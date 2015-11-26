@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# bin/release <build-dir>
+/usr/bin/env ruby <<-EORUBY
+
+$stdout.sync = true
+$stderr.sync = true
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+
+require 'java_buildpack/buildpack'
+
+build_dir = ARGV[0]
+
+output = JavaBuildpack::Buildpack.with_buildpack(build_dir, 'Release failed with exception %s') do |buildpack|
+  buildpack.release
+end
+
+puts output
+EORUBY
+
+cat << EOF
+addons: []
+default_process_types:
+  web: npm start
+EOF

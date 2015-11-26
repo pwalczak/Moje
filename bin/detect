@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# bin/detect <build-dir>
+
+/usr/bin/env ruby <<-EORUBY
+$stdout.sync = true
+$stderr.sync = true
+$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+
+require 'java_buildpack/buildpack'
+
+build_dir = ARGV[0]
+
+components = JavaBuildpack::Buildpack.with_buildpack(build_dir, 'Detect failed with exception %s') do |buildpack|
+  buildpack.detect
+end.compact
+
+if components.empty?
+  abort
+else
+  str = components.join(' ')
+  puts str.length > 255 ? str.slice(0..251) + '...' : str
+end
+
+EORUBY
+
+BP=$(dirname $(dirname $0))
+if [ -f $1/package.json ]; then
+  echo "node.js `cat $BP/VERSION`"
+  exit 0
+fi
+
+exit 1
